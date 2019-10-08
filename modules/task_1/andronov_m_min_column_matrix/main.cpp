@@ -1,5 +1,5 @@
 #include <gtest-mpi-listener.hpp>
-#include <gtest\gtest.h>
+#include <gtest/gtest.h>
 #include "./min_column_matrix.h"
 
 TEST(MIN_COLUMNS_MPI, Test_On_Size_3) {
