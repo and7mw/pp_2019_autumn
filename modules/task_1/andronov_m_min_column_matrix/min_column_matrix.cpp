@@ -1,9 +1,9 @@
-#include "min_column_matrix.h"
+//Copyright 2019 Andronov Maxim
 #include <random>
 #include <mpi.h>
+#include "../../../modules/task_1/andronov_m_min_column_matrix/min_column_matrix.h"
 
 std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
-
     std::vector < std::vector<int> > matrix;
 
     matrix.resize(rows);
@@ -24,7 +24,7 @@ std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > M
     int columns = Matrix[0].size();
 
     std::vector <int> result(columns);
-    //переделать используя stl метод
+
     for (int i = 0; i < columns; i++) {
         int min = Matrix[0][i];
         for (int j = 1; j < rows; j++) {
@@ -38,8 +38,7 @@ std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > M
     return result;
 }
 
-std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Matrix, int rows, 
-                                                                int columns) {
+std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Matrix, int rows, int columns) {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -54,16 +53,16 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
     if (rank == 0) {
         std::vector<int> tr_matrix;
 
-        if (delta > 0) {//size > 1
-            for (int i = delta_rem + delta; i < columns; i++) //i = 0
+        if (delta > 0) {
+            for (int i = delta_rem + delta; i < columns; i++)
                 for (int j = 0; j < rows; j++)
                     tr_matrix.push_back(Matrix[j][i]);
-            for (int i = 0; i < size - 1; i++) //tag?
+            for (int i = 0; i < size - 1; i++)
                 MPI_Send(&tr_matrix[0] + delta * rows * i, delta*rows, MPI_INT, i + 1, 0, MPI_COMM_WORLD);
         }
     } else {        
         MPI_Status status;
-        if (delta > 0) //?
+        if (delta > 0)
             MPI_Recv(&local_columns[0], delta*rows, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
     }
 
@@ -75,16 +74,14 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
                 local_tr_matrix.push_back(Matrix[j][i]);
 
         for (int i = 0; i < delta_rem + delta; i++)
-            result.push_back(*min_element(local_tr_matrix.begin() + i * rows,
-                local_tr_matrix.begin() + (i + 1) * rows));
+            result.push_back(*min_element(local_tr_matrix.begin() + i * rows, local_tr_matrix.begin() + (i + 1) * rows));
 
         if (delta > 0) {
             std::vector <int> local_result(delta);
             for (int i = 1; i < size; i++) {
                 MPI_Status status;
                 MPI_Recv(&local_result[0], delta, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                //проверка status
-                result.insert(result.end(), local_result.begin(), local_result.end());//!&!&!!&!&&!
+                result.insert(result.end(), local_result.begin(), local_result.end());
             }
         }
     } else {
@@ -92,7 +89,7 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
             std::vector <int> local_result(delta);
             for (int i = 0; i < delta; i++) {
                 local_result[i] = *min_element(local_columns.begin() + i * rows,
-                    local_columns.begin() + (i + 1) * rows); //переделать в end?
+                    local_columns.begin() + (i + 1) * rows);
             }
             MPI_Send(&local_result[0], delta, MPI_INT, 0, 0, MPI_COMM_WORLD);
         }
