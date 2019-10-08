@@ -76,7 +76,7 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
                 local_tr_matrix.push_back(Matrix[j][i]);
 
         for (int i = 0; i < delta_rem + delta; i++)
-            result.push_back(*min_element(local_tr_matrix.begin() + i * rows, 
+            result.push_back(*min_element(local_tr_matrix.begin() + i * rows,
                                         local_tr_matrix.begin() + (i + 1) * rows));
 
         if (delta > 0) {
