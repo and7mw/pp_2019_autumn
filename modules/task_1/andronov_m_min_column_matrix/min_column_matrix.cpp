@@ -12,8 +12,8 @@ std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution <int> dist(-10, 10);
 
-    for (size_t i = 0; i < rows; i++)
-        for (size_t j = 0; j < columns; j++)
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < columns; j++)
             matrix[i].push_back(dist(gen));
 
     return matrix;
@@ -25,9 +25,9 @@ std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > M
 
     std::vector <int> result(columns);
     //переделать используя stl метод
-    for (size_t i = 0; i < columns; i++) {
+    for (int i = 0; i < columns; i++) {
         int min = Matrix[0][i];
-        for (size_t j = 1; j < rows; j++) {
+        for (int j = 1; j < rows; j++) {
             if (Matrix[j][i] < min)
                 min = Matrix[j][i];
         }
@@ -75,28 +75,8 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
                 local_tr_matrix.push_back(Matrix[j][i]);
 
         for (int i = 0; i < delta_rem + delta; i++)
-            result.push_back(*std::min_element(local_tr_matrix.begin() + i * rows,
+            result.push_back(*min_element(local_tr_matrix.begin() + i * rows,
                 local_tr_matrix.begin() + (i + 1) * rows));
-        //if (delta_rem > 0) {//size > 1
-        //    for (int i = 0; i < delta_rem; i++)
-        //        for (int j = 0; j < rows; j++)
-        //            local_tr_matrix.push_back(Matrix[j][i]);
-
-        //    for (int i = 0; i < delta_rem; i++) {
-        //        result.push_back(*std::min_element(local_tr_matrix.begin() + i * rows,
-        //            local_tr_matrix.begin() + (i + 1) * rows)); //переделать в end?
-        //    }
-
-        //} else {
-        //    for (int i = 0; i < delta; i++) //i < columns
-        //        for (int j = 0; j < rows; j++)
-        //            local_tr_matrix.push_back(Matrix[j][i]);
-
-        //    for (int i = 0; i < delta; i++) {
-        //        result.push_back(*std::min_element(local_tr_matrix.begin() + i * rows,
-        //            local_tr_matrix.begin() + (i + 1) * rows)); //переделать в end?
-        //    }
-        //}
 
         if (delta > 0) {
             std::vector <int> local_result(delta);
@@ -111,7 +91,7 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
         if (delta > 0) {
             std::vector <int> local_result(delta);
             for (int i = 0; i < delta; i++) {
-                local_result[i] = *std::min_element(local_columns.begin() + i * rows,
+                local_result[i] = *min_element(local_columns.begin() + i * rows,
                     local_columns.begin() + (i + 1) * rows); //переделать в end?
             }
             MPI_Send(&local_result[0], delta, MPI_INT, 0, 0, MPI_COMM_WORLD);
