@@ -1,6 +1,7 @@
 //Copyright 2019 Andronov Maxim
 #include <random>
 #include <mpi.h>
+#include <algorithm>
 #include "../../../modules/task_1/andronov_m_min_column_matrix/min_column_matrix.h"
 
 std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
