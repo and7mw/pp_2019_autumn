@@ -1,7 +1,8 @@
-//Copyright 2019 Andronov Maxim
-#include <random>
+// Copyright 2019 Andronov Maxim
 #include <mpi.h>
+#include <random>
 #include <algorithm>
+#include <vector>
 #include "../../../modules/task_1/andronov_m_min_column_matrix/min_column_matrix.h"
 
 std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
@@ -39,7 +40,7 @@ std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > M
     return result;
 }
 
-std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Matrix, int rows, int columns) {
+std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Matrix, int rows, int columns) {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -61,7 +62,7 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
             for (int i = 0; i < size - 1; i++)
                 MPI_Send(&tr_matrix[0] + delta * rows * i, delta*rows, MPI_INT, i + 1, 0, MPI_COMM_WORLD);
         }
-    } else {        
+    } else {
         MPI_Status status;
         if (delta > 0)
             MPI_Recv(&local_columns[0], delta*rows, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
@@ -70,12 +71,13 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
     if (rank == 0) {
         std::vector <int> local_tr_matrix;
 
-        for (int i = 0; i < delta_rem + delta; i++) 
+        for (int i = 0; i < delta_rem + delta; i++)
             for (int j = 0; j < rows; j++)
                 local_tr_matrix.push_back(Matrix[j][i]);
 
         for (int i = 0; i < delta_rem + delta; i++)
-            result.push_back(*min_element(local_tr_matrix.begin() + i * rows, local_tr_matrix.begin() + (i + 1) * rows));
+            result.push_back(*min_element(local_tr_matrix.begin() + i * rows, 
+                                        local_tr_matrix.begin() + (i + 1) * rows));
 
         if (delta > 0) {
             std::vector <int> local_result(delta);
@@ -98,3 +100,4 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> >& Ma
 
     return result;
 }
+

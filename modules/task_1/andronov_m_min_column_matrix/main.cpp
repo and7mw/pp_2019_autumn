@@ -1,6 +1,7 @@
-//Copyright 2019 Andronov Maxim
+// Copyright 2019 Andronov Maxim
 #include <gtest-mpi-listener.hpp>
 #include <gtest/gtest.h>
+#include <vector>
 #include "./min_column_matrix.h"
 
 TEST(MIN_COLUMNS_MPI, Test_On_Size_3) {
@@ -53,3 +54,4 @@ int main(int argc, char** argv) {
     listeners.Append(new GTestMPIListener::MPIMinimalistPrinter);
     return RUN_ALL_TESTS();
 }
+
