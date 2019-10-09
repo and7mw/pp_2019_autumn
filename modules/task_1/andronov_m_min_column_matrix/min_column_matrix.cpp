@@ -6,13 +6,16 @@
 #include "../../../modules/task_1/andronov_m_min_column_matrix/min_column_matrix.h"
 
 std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
+    if (rows < 1 || columns < 1)
+        throw - 1;
+
     std::vector < std::vector<int> > matrix;
 
     matrix.resize(rows);
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution <int> dist(-10, 10);
+    std::uniform_int_distribution <int> dist(-100, 100);
 
     for (int i = 0; i < rows; i++)
         for (int j = 0; j < columns; j++)
@@ -24,6 +27,9 @@ std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
 std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > Matrix) {
     int rows = Matrix.size();
     int columns = Matrix[0].size();
+
+    if (rows < 1 || columns < 1)
+        throw - 1;
 
     std::vector <int> result(columns);
 
@@ -44,6 +50,21 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    int Error = 0;
+    if (rank == 0) {
+        if (rows != Matrix.size() || columns != Matrix[0].size()) {
+            Error = 1;
+            for (int i = 1; i < size; i++)
+                MPI_Send(&Error, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+    } else {
+        MPI_Status status;
+        MPI_Recv(&Error, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+    }
+
+    if (Error == 1)
+        throw - 1;
 
     const int delta = columns / size;
     const int delta_rem = columns % size;
