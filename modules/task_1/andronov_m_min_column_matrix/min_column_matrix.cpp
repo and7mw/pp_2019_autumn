@@ -56,11 +56,10 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
 
     int Error = 0;
     if (rank == 0) {
-        if (rows != static_cast<int>(Matrix.size()) || columns != static_cast<int>(Matrix[0].size())) {
+        if (rows != static_cast<int>(Matrix.size()) || columns != static_cast<int>(Matrix[0].size()))
             Error = 1;
             for (int i = 1; i < size; i++)
                 MPI_Send(&Error, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
-        }
     } else {
         MPI_Status status;
         MPI_Recv(&Error, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
