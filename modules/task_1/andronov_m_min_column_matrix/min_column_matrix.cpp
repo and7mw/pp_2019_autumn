@@ -26,7 +26,10 @@ std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
 
 std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > Matrix) {
     int rows = Matrix.size();
-    int columns = Matrix[0].size();
+    int columns = 0;
+
+    if (rows > 0)
+        columns = Matrix[0].size();
 
     if (rows < 1 || columns < 1)
         throw - 1;
