@@ -38,7 +38,7 @@ TEST(Min_Columns_MPI, Incorrect_Arguments_Parall_Min) {
 
     ASSERT_ANY_THROW(GetParallelMinValueColumn(Matrix, 1, 1));
 }
-I
+
 TEST(Min_Columns_MPI, Test_On_Size_2) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
