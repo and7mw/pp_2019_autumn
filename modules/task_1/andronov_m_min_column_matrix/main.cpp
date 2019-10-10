@@ -22,7 +22,7 @@ TEST(MPI_Min_Columns, Incorrect_Arguments_Seq_Min) {
     std::vector< std::vector<int> > Matrix;
 
     if (rank == 0) {
-        ASSERT_ANY_THROW(GetSequentialMinValueColumn(Matrix);
+        ASSERT_ANY_THROW(GetSequentialMinValueColumn(Matrix));
     }
 }
 
