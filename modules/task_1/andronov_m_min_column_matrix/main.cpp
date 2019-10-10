@@ -4,7 +4,7 @@
 #include <vector>
 #include "./min_column_matrix.h"
 
-TEST(MPI_Min_Columns, Incorrect_Arguments_Create_Matrix) {
+TEST(Min_Columns_MPI, Incorrect_Arguments_Create_Matrix) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -15,7 +15,7 @@ TEST(MPI_Min_Columns, Incorrect_Arguments_Create_Matrix) {
     }
 }
 
-TEST(MPI_Min_Columns, Incorrect_Arguments_Seq_Min) {
+TEST(Min_Columns_MPI, Incorrect_Arguments_Seq_Min) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -26,7 +26,7 @@ TEST(MPI_Min_Columns, Incorrect_Arguments_Seq_Min) {
     }
 }
 
-TEST(MPI_Min_Columns, Incorrect_Arguments_Parall_Min) {
+TEST(Min_Columns_MPI, Incorrect_Arguments_Parall_Min) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -39,7 +39,7 @@ TEST(MPI_Min_Columns, Incorrect_Arguments_Parall_Min) {
     ASSERT_ANY_THROW(GetParallelMinValueColumn(Matrix, 1, 1));
 }
 
-TEST(MPI_Min_Columns, Test_On_Size_1) {
+TEST(Min_Columns_MPI, Test_On_Size_1) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -57,7 +57,7 @@ TEST(MPI_Min_Columns, Test_On_Size_1) {
     }
 }
 
-TEST(MPI_Min_Columns, Test_On_Size_1) {
+TEST(Min_Columns_MPI, Test_On_Size_1) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -75,7 +75,7 @@ TEST(MPI_Min_Columns, Test_On_Size_1) {
     }
 }
 
-TEST(MPI_Min_Columns, Test_On_Size_2) {
+TEST(Min_Columns_MPI, Test_On_Size_2) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -93,7 +93,7 @@ TEST(MPI_Min_Columns, Test_On_Size_2) {
     }
 }
 
-TEST(MPI_Min_Columns, Test_On_Size_3) {
+TEST(Min_Columns_MPI, Test_On_Size_3) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -111,7 +111,7 @@ TEST(MPI_Min_Columns, Test_On_Size_3) {
     }
 }
 
-TEST(MPI_Min_Columns, Test_On_Size_4) {
+TEST(Min_Columns_MPI, Test_On_Size_4) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -129,7 +129,7 @@ TEST(MPI_Min_Columns, Test_On_Size_4) {
     }
 }
 
-TEST(MPI_Min_Columns, Test_On_Size_51) {
+TEST(Min_Columns_MPI, Test_On_Size_51) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
