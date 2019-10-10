@@ -59,11 +59,11 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
         if (rows != static_cast<int>(Matrix.size()) || columns != static_cast<int>(Matrix[0].size())) {
             Error = 1;
             for (int i = 1; i < size; i++)
-                MPI_Send(&Error, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                MPI_Send(&Error, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
         }
     } else {
         MPI_Status status;
-        MPI_Recv(&Error, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&Error, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
     }
 
     if (Error == 1)
@@ -84,12 +84,12 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
                 for (int j = 0; j < rows; j++)
                     tr_matrix.push_back(Matrix[j][i]);
             for (int i = 0; i < size - 1; i++)
-                MPI_Send(&tr_matrix[0] + delta * rows * i, delta*rows, MPI_INT, i + 1, 0, MPI_COMM_WORLD);
+                MPI_Send(&tr_matrix[0] + delta * rows * i, delta*rows, MPI_INT, i + 1, 2, MPI_COMM_WORLD);
         }
     } else {
         MPI_Status status;
         if (delta > 0)
-            MPI_Recv(&local_columns[0], delta*rows, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&local_columns[0], delta*rows, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
     }
 
     if (rank == 0) {
@@ -107,7 +107,7 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
             std::vector <int> local_result(delta);
             for (int i = 1; i < size; i++) {
                 MPI_Status status;
-                MPI_Recv(&local_result[0], delta, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&local_result[0], delta, MPI_INT, i, 3, MPI_COMM_WORLD, &status);
                 result.insert(result.end(), local_result.begin(), local_result.end());
             }
         }
@@ -118,7 +118,7 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
                 local_result[i] = *min_element(local_columns.begin() + i * rows,
                     local_columns.begin() + (i + 1) * rows);
             }
-            MPI_Send(&local_result[0], delta, MPI_INT, 0, 0, MPI_COMM_WORLD);
+            MPI_Send(&local_result[0], delta, MPI_INT, 0, 3, MPI_COMM_WORLD);
         }
     }
 
