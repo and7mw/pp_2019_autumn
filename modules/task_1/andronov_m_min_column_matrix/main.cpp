@@ -57,24 +57,6 @@ TEST(Min_Columns_MPI, Test_On_Size_1) {
     }
 }
 
-TEST(Min_Columns_MPI, Test_On_Size_1) {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    std::vector< std::vector<int> > Matrix;
-
-    if (rank == 0) {
-        Matrix = GetRandomMatrix(1, 1);
-    }
-
-    std::vector<int> result_parall = GetParallelMinValueColumn(Matrix, 1, 1);
-
-    if (rank == 0) {
-        std::vector <int> result = GetSequentialMinValueColumn(Matrix);
-        ASSERT_EQ(result, result_parall);
-    }
-}
-
 TEST(Min_Columns_MPI, Test_On_Size_2) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
