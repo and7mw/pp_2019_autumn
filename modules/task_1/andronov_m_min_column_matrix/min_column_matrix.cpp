@@ -5,58 +5,68 @@
 #include <vector>
 #include "../../../modules/task_1/andronov_m_min_column_matrix/min_column_matrix.h"
 
-std::vector< std::vector<int> > GetRandomMatrix(int rows, int columns) {
+std::vector<int> GetRandomMatrix(int rows, int columns) {
     if (rows < 1 || columns < 1)
         throw - 1;
 
-    std::vector < std::vector<int> > matrix;
+    std::vector <int> matrix;
 
-    matrix.resize(rows);
+    matrix.resize(rows*columns);
 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution <int> dist(-100, 100);
 
-    for (int i = 0; i < rows; i++)
-        for (int j = 0; j < columns; j++)
-            matrix[i].push_back(dist(gen));
+    for (int i = 0; i < rows*columns; i++)
+            matrix[i] = dist(gen);
 
     return matrix;
 }
 
-std::vector <int> GetSequentialMinValueColumn(std::vector < std::vector<int> > Matrix) {
-    int rows = Matrix.size();
-    int columns = 0;
-
-    if (rows > 0)
-        columns = Matrix[0].size();
-
+std::vector <int> GetTransposeMatrix(std::vector <int> Matrix, int rows, int columns) {
     if (rows < 1 || columns < 1)
+        throw - 1;
+
+    if (rows*columns != static_cast<int>(Matrix.size()))
+        throw - 1;
+
+    std::vector <int> tr_matrix(rows*columns);
+
+    int k = -1;
+    for (int i = 0, j = 0; i < columns*rows; i++, j = (j+1) % columns) {
+        if (i % columns == 0)
+            k++;
+        tr_matrix[i] = Matrix[(j*columns) + k];
+    }
+
+    return tr_matrix;
+}
+
+std::vector <int> GetSequentialMinValueColumn(std::vector <int> Matrix, int rows, int columns) {
+    if (rows < 1 || columns < 1)
+        throw - 1;
+
+    if (rows*columns != static_cast<int>(Matrix.size()))
         throw - 1;
 
     std::vector <int> result(columns);
 
-    for (int i = 0; i < columns; i++) {
-        int min = Matrix[0][i];
-        for (int j = 1; j < rows; j++) {
-            if (Matrix[j][i] < min)
-                min = Matrix[j][i];
-        }
+    std::vector <int> tr_matrix = GetTransposeMatrix(Matrix, rows, columns);
 
-        result[i] = min;
-    }
+    for (int i = 0; i < columns; i++)
+        result[i] = *min_element(tr_matrix.begin() + i * rows, tr_matrix.begin() + (i + 1) * rows);
 
     return result;
 }
 
-std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Matrix, int rows, int columns) {
+std::vector <int> GetParallelMinValueColumn(std::vector <int> Matrix, int rows, int columns) {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     int Error = 0;
     if (rank == 0) {
-        if (rows != static_cast<int>(Matrix.size()) || columns != static_cast<int>(Matrix[0].size())) {
+        if (rows*columns != static_cast<int>(Matrix.size())) {
             Error = 1;
         }
         for (int i = 1; i < size; i++)
@@ -75,17 +85,17 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
     std::vector <int> result;
 
     std::vector <int> local_columns(delta*rows);
+    std::vector <int> local_columns0;
 
     if (rank == 0) {
         std::vector<int> tr_matrix;
+        tr_matrix = GetTransposeMatrix(Matrix, rows, columns);
 
         if (delta > 0) {
-            for (int i = delta_rem + delta; i < columns; i++)
-                for (int j = 0; j < rows; j++)
-                    tr_matrix.push_back(Matrix[j][i]);
-            for (int i = 0; i < size - 1; i++)
-                MPI_Send(&tr_matrix[0] + delta * rows * i, delta*rows, MPI_INT, i + 1, 2, MPI_COMM_WORLD);
+            for (int i = 1; i < size; i++)
+                MPI_Send(&tr_matrix[(delta+delta_rem)*rows] + delta * rows * i, delta*rows, MPI_INT, i, 2, MPI_COMM_WORLD);
         }
+        local_columns0 = std::vector<int>(tr_matrix.begin(), tr_matrix.begin() + (delta + delta_rem)*rows);
     } else {
         MPI_Status status;
         if (delta > 0)
@@ -93,15 +103,9 @@ std::vector <int> GetParallelMinValueColumn(std::vector < std::vector<int> > Mat
     }
 
     if (rank == 0) {
-        std::vector <int> local_tr_matrix;
-
         for (int i = 0; i < delta_rem + delta; i++)
-            for (int j = 0; j < rows; j++)
-                local_tr_matrix.push_back(Matrix[j][i]);
-
-        for (int i = 0; i < delta_rem + delta; i++)
-            result.push_back(*min_element(local_tr_matrix.begin() + i * rows,
-                                        local_tr_matrix.begin() + (i + 1) * rows));
+            result.push_back(*min_element(local_columns0.begin() + i * rows,
+                                        local_columns0.begin() + (i + 1) * rows));
 
         if (delta > 0) {
             std::vector <int> local_result(delta);
