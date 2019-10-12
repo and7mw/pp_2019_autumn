@@ -58,7 +58,7 @@ TEST(Min_Columns_MPI, Correct_Seq_Min) {
     if (rank == 0) {
         res = GetSequentialMinValueColumn(Matrix, 2, 2);
         ASSERT_EQ(e, res);
-    }   
+    }
 }
 
 TEST(Min_Columns_MPI, Correct_Transpose_Even) {
@@ -218,4 +218,5 @@ int main(int argc, char** argv) {
     listeners.Append(new GTestMPIListener::MPIMinimalistPrinter);
     return RUN_ALL_TESTS();
 }
+
 

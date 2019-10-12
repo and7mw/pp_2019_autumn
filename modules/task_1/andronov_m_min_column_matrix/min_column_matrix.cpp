@@ -93,7 +93,8 @@ std::vector <int> GetParallelMinValueColumn(std::vector <int> Matrix, int rows, 
 
         if (delta > 0) {
             for (int i = 1; i < size; i++)
-                MPI_Send(&tr_matrix[(delta+delta_rem)*rows] + delta * rows * i, delta*rows, MPI_INT, i, 2, MPI_COMM_WORLD);
+                MPI_Send(&tr_matrix[(delta+delta_rem)*rows] + delta * rows * i,
+                                    delta*rows, MPI_INT, i, 2, MPI_COMM_WORLD);
         }
         local_columns0 = std::vector<int>(tr_matrix.begin(), tr_matrix.begin() + (delta + delta_rem)*rows);
     } else {
@@ -128,4 +129,5 @@ std::vector <int> GetParallelMinValueColumn(std::vector <int> Matrix, int rows, 
 
     return result;
 }
+
 
