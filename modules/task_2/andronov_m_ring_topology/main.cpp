@@ -42,7 +42,7 @@ TEST(Ring_Topology, no_ring_topology_if_period_not_equal_one) {
     EXPECT_FALSE(IsRingTopology(testcomm));
 }
 
-/*TEST(Ring_Topology, test_ring_topology_on_dest_and_source) {
+TEST(Ring_Topology, test_ring_topology_on_dest_and_source) {
     MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
 
     int rank, size, source, dest;
@@ -107,7 +107,7 @@ TEST(Ring_Topology, send_message_opposite) {
         std::vector<int> emessage(3, 1);
         EXPECT_EQ(emessage, result);
     }
-}*/
+}
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);

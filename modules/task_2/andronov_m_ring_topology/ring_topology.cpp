@@ -44,29 +44,35 @@ std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
     if (source > (size-1) || source < 0 || dest > (size - 1) || dest < 0)
         throw -1;
 
-    if (dest == source)
-        return message;
+    if (((rank >= source) && (rank <= dest)) ||
+        ((dest - source < 0) && ((rank >= source) || (rank <= dest)))) {
 
-    int curr_dest, curr_source;
-    MPI_Status status;
+        if (dest == source)
+            return message;
 
-    MPI_Cart_shift(ringcomm, 0, 1, &curr_source, &curr_dest);
+        int curr_dest, curr_source;
+        MPI_Status status;
 
-    if (rank == source) {
-        MPI_Send(&message[0], mess_size, MPI_INT, curr_dest, 1, ringcomm);
-    } else if (rank == dest) {
-        result.resize(mess_size);
-        MPI_Recv(&result[0], mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
-    } else {
-        result.resize(mess_size);
+        MPI_Cart_shift(ringcomm, 0, 1, &curr_source, &curr_dest);
 
-        std::vector<int> *tmp = new std::vector<int>;
-        tmp->resize(mess_size);
+        if (rank == source) {
+            MPI_Send(&message[0], mess_size, MPI_INT, curr_dest, 1, ringcomm);
+        }
+        else if (rank == dest) {
+            result.resize(mess_size);
+            MPI_Recv(&result[0], mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
+        }
+        else {
+            result.resize(mess_size);
 
-        MPI_Recv(&((*tmp)[0]), mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
-        MPI_Send(&((*tmp)[0]), mess_size, MPI_INT, curr_dest, 1, ringcomm);
+            std::vector<int> *tmp = new std::vector<int>;
+            tmp->resize(mess_size);
 
-        delete tmp;
+            MPI_Recv(&((*tmp)[0]), mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
+            MPI_Send(&((*tmp)[0]), mess_size, MPI_INT, curr_dest, 1, ringcomm);
+
+            delete tmp;
+        }
     }
     return result;
 }
