@@ -34,7 +34,7 @@ bool IsRingTopology(MPI_Comm comm) {
     return true;
 }
 
-std::vector<int> Send(MPI_Comm ringcomm, int source, int dest, 
+std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
                         std::vector <int> message, int mess_size) {
     int size, rank;
     MPI_Comm_size(ringcomm, &size);
