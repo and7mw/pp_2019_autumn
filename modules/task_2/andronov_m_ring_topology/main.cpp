@@ -4,13 +4,6 @@
 #include <vector>
 #include "../../../modules/task_2/andronov_m_ring_topology/ring_topology.h"
 
-TEST(CHECK_SIZE, SKOKA) {
-    int size;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    EXPECT_EQ(2, size);
-}
-
 TEST(Ring_Topology, can_create_ring_topology) {
     MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
 
@@ -77,7 +70,7 @@ TEST(Ring_Topology, send_message_to_neib) {
 
     if (rank == 0) {
         message.resize(3);
-        for (int i = 0; i < message.size(); i++)
+        for (size_t i = 0; i < message.size(); i++)
             message[i] = 1;
     }
 
@@ -98,7 +91,7 @@ TEST(Ring_Topology, send_message_to_neib_opposite) {
 
     if (rank == 1) {
         message.resize(3);
-        for (int i = 0; i < message.size(); i++)
+        for (size_t i = 0; i < message.size(); i++)
             message[i] = 1;
     }
 
