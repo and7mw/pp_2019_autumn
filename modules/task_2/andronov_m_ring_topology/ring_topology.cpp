@@ -46,7 +46,6 @@ std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
 
     if (((rank >= source) && (rank <= dest)) ||
         ((dest - source < 0) && ((rank >= source) || (rank <= dest)))) {
-
         if (dest == source)
             return message;
 
