@@ -57,12 +57,10 @@ std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
 
         if (rank == source) {
             MPI_Send(&message[0], mess_size, MPI_INT, curr_dest, 1, ringcomm);
-        }
-        else if (rank == dest) {
+        } else if (rank == dest) {
             result.resize(mess_size);
             MPI_Recv(&result[0], mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
-        }
-        else {
+        } else {
             result.resize(mess_size);
 
             std::vector<int> *tmp = new std::vector<int>;

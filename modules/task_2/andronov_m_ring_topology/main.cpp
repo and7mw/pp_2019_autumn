@@ -49,7 +49,7 @@ TEST(Ring_Topology, test_ring_topology_on_dest_and_source) {
     MPI_Comm_rank(ringcomm, &rank);
     MPI_Comm_size(ringcomm, &size);
     MPI_Cart_shift(ringcomm, 0, 1, &source, &dest);
-    
+
     if (size == 1) {
         EXPECT_EQ(0, dest);
         EXPECT_EQ(0, source);
