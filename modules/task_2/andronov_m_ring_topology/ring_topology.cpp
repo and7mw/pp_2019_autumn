@@ -60,8 +60,6 @@ std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
             result.resize(mess_size);
             MPI_Recv(&result[0], mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
         } else {
-            result.resize(mess_size);
-
             std::vector<int> *tmp = new std::vector<int>;
             tmp->resize(mess_size);
 

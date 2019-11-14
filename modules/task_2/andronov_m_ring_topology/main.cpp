@@ -109,6 +109,72 @@ TEST(Ring_Topology, send_message_opposite) {
     }
 }
 
+TEST(Ring_Topology, cant_send_if_source_less_zero) {
+    MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
+    int rank, size;
+    MPI_Comm_rank(ringcomm, &rank);
+    MPI_Comm_size(ringcomm, &size);
+
+    std::vector<int> message(3);
+
+    ASSERT_ANY_THROW(Send(ringcomm, -1, 0, message, 3));
+}
+
+TEST(Ring_Topology, cant_send_if_dest_less_zero) {
+    MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
+    int rank, size;
+    MPI_Comm_rank(ringcomm, &rank);
+    MPI_Comm_size(ringcomm, &size);
+
+    std::vector<int> message(3);
+
+    ASSERT_ANY_THROW(Send(ringcomm, 0, -1, message, 3));
+}
+
+TEST(Ring_Topology, cant_send_if_dest_more_size) {
+    MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
+    int rank, size;
+    MPI_Comm_rank(ringcomm, &rank);
+    MPI_Comm_size(ringcomm, &size);
+
+    std::vector<int> message(3);
+
+    ASSERT_ANY_THROW(Send(ringcomm, 0, size, message, 3));
+}
+
+TEST(Ring_Topology, cant_send_if_source_more_size) {
+    MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
+    int rank, size;
+    MPI_Comm_rank(ringcomm, &rank);
+    MPI_Comm_size(ringcomm, &size);
+
+    std::vector<int> message(3);
+
+    ASSERT_ANY_THROW(Send(ringcomm, size, 0, message, 3));
+}
+
+TEST(Ring_Topology, can_send_to_itself) {
+    MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
+    int rank, size;
+    MPI_Comm_rank(ringcomm, &rank);
+    MPI_Comm_size(ringcomm, &size);
+
+    std::vector<int> message;
+
+    if (rank == 0) {
+        message.resize(3);
+        for (size_t i = 0; i < message.size(); i++)
+            message[i] = 1;
+    }
+
+    std::vector<int> result = Send(ringcomm, 0, 0, message, 3);
+
+    if (rank == 0) {
+        std::vector<int> emessage(3, 1);
+        EXPECT_EQ(emessage, result);
+    }
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     MPI_Init(&argc, &argv);
