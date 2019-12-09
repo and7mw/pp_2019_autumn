@@ -11,4 +11,6 @@ unsigned char GetByte(int value, int number);
 
 std::vector<int> RadixSort(std::vector<int> array);
 
+std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array, int size_arr);
+
 #endif  // MODULES_TASK_3_ANDRONOV_M_RADIX_WITH_BATCHER_SPLIT_

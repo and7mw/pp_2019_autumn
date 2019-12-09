@@ -3,6 +3,8 @@
 #include <vector>
 #include "../../../modules/task_3/andronov_m_radix_with_batcher_split/radix_with_batcher_split.h"
 
+#include <iostream>
+
 std::vector<int> GetRandomVector(int size) {
     if (size < 1)
         throw - 1;
@@ -50,8 +52,7 @@ std::vector<int> RadixSort(std::vector<int> array) {
                 unsigned char value = GetByte(array[j], i);
                 tmp[offset[value]] = array[j];
                 offset[value]++;
-            }
-            else {
+            } else {
                 int value = GetByte(tmp[j], i);
                 array[offset[value]] = tmp[j];
                 offset[value]++;
@@ -77,4 +78,172 @@ std::vector<int> RadixSort(std::vector<int> array) {
     }
 
     return array;
+}
+
+std::vector<int> EvenSplit(std::vector<int> arr1, std::vector<int> arr2) {
+    int arr1_size = arr1.size();
+    int arr2_size = arr2.size();
+    int result_size = arr1_size / 2 + arr2_size / 2 + arr1_size % 2 + arr2_size % 2;
+    std::vector<int> result(result_size);
+    int i = 0;
+    int j = 0, k = 0;
+
+    while ((j < arr1_size) && (k < arr2_size)) {
+        if (arr1[j] <= arr2[k]) {
+            result[i] = arr1[j];
+            j += 2;
+        }
+        else {
+            result[i] = arr2[k];
+            k += 2;
+        }
+        i++;
+    }
+
+    if (j >= arr1_size) {
+        for (int l = k; l < arr2_size; l += 2) {
+            result[i] = arr2[l];
+            i++;
+        }
+    }
+    else {
+        for (int l = j; l < arr1_size; l += 2) {
+            result[i] = arr1[l];
+            i++;
+        }
+    }
+
+    return result;
+}
+
+std::vector<int> OddSplit(std::vector<int> arr1, std::vector<int> arr2) {
+    int arr1_size = arr1.size();
+    int arr2_size = arr2.size();
+    int result_size = arr1_size / 2 + arr2_size / 2;
+    std::vector<int> result(result_size);
+    int i = 0;
+    int j = 1, k = 1;
+
+    while ((j < arr1_size) && (k < arr2_size)) {
+        if (arr1[j] <= arr2[k]) {
+            result[i] = arr1[j];
+            j += 2;
+        }
+        else {
+            result[i] = arr2[k];
+            k += 2;
+        }
+        i++;
+    }
+
+    if (j >= arr1_size) {
+        for (int l = k; l < arr2_size; l += 2) {
+            result[i] = arr2[l];
+            i++;
+        }
+    }
+    else {
+        for (int l = j; l < arr1_size; l += 2) {
+            result[i] = arr1[l];
+            i++;
+        }
+    }
+
+    return result;
+}
+
+//arr1 - четные   arr2 - нечетные
+std::vector<int> EvenOddSplit(std::vector<int> arr1, std::vector<int> arr2) {
+    int arr1_size = arr1.size();
+    int arr2_size = arr2.size();
+    int result_size = arr1_size + arr2_size;
+    std::vector<int> result(result_size);
+    int i = 0, j = 0, k = 0;
+
+    while ((j < arr1_size) && (k < arr2_size)) {
+        result[i] = arr1[j];
+        result[i + 1] = arr2[k];
+        i += 2;
+        j++;
+        k++;
+    }
+
+    if ((k >= arr2_size) && (j < arr1_size)) {
+        for (int l = i; l < result_size; l++) {
+            result[l] = arr1[j];
+            j++;
+        }
+    }
+
+    for (int i = 0; i < result_size - 1; i++) {
+        if (result[i] > result[i + 1])
+            std::swap(result[i], result[i + 1]);
+    }
+
+    return result;
+}
+
+std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array, int size_arr) {
+    int size, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if (size == 1)
+        return RadixSort(array);
+    
+    MPI_Comm MPI_COMM_TASK = MPI_COMM_NULL;
+
+    if (size_arr < size) {
+        MPI_Group global_group, new_group;
+        MPI_Comm_group(MPI_COMM_WORLD, &global_group);
+        std::vector<int> new_group_ranks;
+        for (int i = 0; i < size_arr; i++)
+            new_group_ranks.push_back(i);
+        MPI_Group_incl(global_group, size, new_group_ranks.data(), &new_group);
+        MPI_Comm_create(MPI_COMM_WORLD, new_group, &MPI_COMM_TASK);
+
+    } else {
+        MPI_COMM_TASK = MPI_COMM_WORLD;
+    }
+
+    if (MPI_COMM_TASK != MPI_COMM_NULL) {
+        MPI_Comm_size(MPI_COMM_TASK, &size);
+        MPI_Comm_rank(MPI_COMM_TASK, &rank);
+
+        int delta = size_arr / size;
+        int delta_rem = size_arr % size;
+
+        std::vector<int> sendcounts(size, delta);
+
+        int elemnts_count = delta_rem;
+        int it = 0;
+        while (elemnts_count != 0) {
+            sendcounts[it]++;
+            it++;
+            elemnts_count--;
+        }
+
+        std::vector<int> displ(size, 0);
+        displ[0] = 0;
+        for (int i = 1; i < size; i++) {
+            displ[i] = displ[i - 1] + sendcounts[i - 1]; //check this!!!
+        }
+        
+        std::vector<int> local_array(displ[rank]);
+
+        MPI_Scatterv(&array[0], &sendcounts[0], &displ[0], MPI_INT, &local_array[0],
+            displ[rank], MPI_INT, 0, MPI_COMM_TASK);
+
+        ////test
+        //for (int i = 0; i < local_array.size(); i++)
+        //    std::cout << local_array[i] << " ";
+        //std::cout << std::endl;
+        ////test
+
+
+        return array;//local_array;
+    }
+    
+
+    if (MPI_COMM_TASK == MPI_COMM_NULL)
+        return array;
 }
