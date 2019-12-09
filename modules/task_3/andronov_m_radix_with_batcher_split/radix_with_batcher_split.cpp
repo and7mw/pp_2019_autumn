@@ -198,7 +198,7 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array, int size_
         std::vector<int> new_group_ranks;
         for (int i = 0; i < size_arr; i++)
             new_group_ranks.push_back(i);
-        MPI_Group_incl(global_group, size, new_group_ranks.data(), &new_group);
+        MPI_Group_incl(global_group, size_arr, new_group_ranks.data(), &new_group);
         MPI_Comm_create(MPI_COMM_WORLD, new_group, &MPI_COMM_TASK);
 
     } else {
@@ -214,33 +214,67 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array, int size_
 
         std::vector<int> sendcounts(size, delta);
 
-        int elemnts_count = delta_rem;
-        int it = 0;
-        while (elemnts_count != 0) {
-            sendcounts[it]++;
-            it++;
-            elemnts_count--;
-        }
-
+        for (int i = 0; i < delta_rem; i++)
+            sendcounts[i]++;
+        
         std::vector<int> displ(size, 0);
         displ[0] = 0;
         for (int i = 1; i < size; i++) {
             displ[i] = displ[i - 1] + sendcounts[i - 1]; //check this!!!
         }
         
-        std::vector<int> local_array(displ[rank]);
-
+        std::vector<int> local_array(sendcounts[rank]);
+        //revcount???
         MPI_Scatterv(&array[0], &sendcounts[0], &displ[0], MPI_INT, &local_array[0],
-            displ[rank], MPI_INT, 0, MPI_COMM_TASK);
+            sendcounts[rank], MPI_INT, 0, MPI_COMM_TASK);
 
-        ////test
-        //for (int i = 0; i < local_array.size(); i++)
-        //    std::cout << local_array[i] << " ";
-        //std::cout << std::endl;
-        ////test
+        //local_array = RadixSort(local_array);
+
+        /*int iteration_size = 0;
+        int bitmask_size = sizeof(int) * 8;
+        if ((1 & size) != 0)
+            iteration_size++;
+        for (int i = 1; i < bitmask_size; i++) {
+            if (((1 << i) & size) != 0)
+                iteration_size += i;
+        }*/
+        //std::cout << iteration_size << std::endl;
+
+        //скопировать sendcount в другой массив??
+
+        /*int curr_split = 1;
+        for (int i = 0; i < iteration_size; i++) {
+            if (rank % curr_split == 0) {
+                if ((rank / curr_split) % 2 == 0) {
+                    MPI_Status status;
+                    std::vector<int> even_elem(sendcounts[rank + curr_split]);
+                    MPI_Send(&local_array[0], sendcounts[rank], MPI_INT, rank + curr_split,
+                                 curr_split, MPI_COMM_TASK);
+                    MPI_Recv(&even_elem[0], sendcounts[rank + curr_split], MPI_INT,
+                        rank + curr_split, curr_split, MPI_COMM_TASK, &status);
+                    even_elem = EvenSplit(local_array, even_elem);
+                    int odd_count = sendcounts[rank] / 2 + sendcounts[rank + curr_split] / 2;
+                    std::vector<int> odd_result(odd_count);
+                    MPI_Recv(&odd_result, odd_count, MPI_INT, rank + curr_split,
+                            curr_split, MPI_COMM_WORLD, &status);
+                    local_array = EvenOddSplit(even_elem, odd_result);
+                } else {
+                    MPI_Status status;
+                    std::vector<int> odd_elem(sendcounts[rank - curr_split]);
+                    MPI_Recv(&odd_elem[0], sendcounts[rank - curr_split], MPI_INT,
+                        rank - curr_split, curr_split, MPI_COMM_TASK, &status);
+                    MPI_Send(&local_array[0], sendcounts[rank], MPI_INT, rank - curr_split,
+                        curr_split, MPI_COMM_TASK);
+                    odd_elem = OddSplit(odd_elem, local_array);
+                    int odd_count = sendcounts[rank] / 2 + sendcounts[rank - curr_split] / 2;
+                    MPI_Send(&odd_elem, odd_count, MPI_INT, rank - curr_split,
+                                curr_split, MPI_COMM_TASK);
+                }
+            }
+        }*/
 
 
-        return array;//local_array;
+        return local_array;
     }
     
 

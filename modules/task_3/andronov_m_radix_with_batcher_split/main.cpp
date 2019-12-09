@@ -233,12 +233,18 @@
 //    EXPECT_EQ(3, size2);
 //}
 
-TEST(proverka_scatter, check) {
-    std::vector<int> arr(10);
-    for (int i = 0; i < 10; i++)
-        arr[i] = i;
+TEST(Radix_With_Batcher_Split, sort_10) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<int> array;
+    const int size = 10;
+    if (rank == 0) {
+        array = GetRandomVector(size);
+    }
 
-    ParallelRadixSortBatcherSplit(arr, 10);
+    array = ParallelRadixSortBatcherSplit(array, size);
+
+    EXPECT_EQ(1, 1);
 }
 
 //TEST(Radix_With_Batcher_Split, ) {
