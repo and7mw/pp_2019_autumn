@@ -79,12 +79,12 @@ int ParallelSum(std::vector <int> vec, int sz, MPI_Comm ringcomm) {
                 MPI_Send(&vec[(delta + delta_rem)] + delta * i,
                     delta, MPI_INT, i + 1, 2, ringcomm);
         }
-        local_columns0 = std::vector<int>(vec.begin(), 
+        local_columns0 = std::vector<int>(vec.begin(),
                         vec.begin() + (delta + delta_rem));
     } else {
         MPI_Status status;
         if (delta > 0)
-            MPI_Recv(&local_columns[0], 
+            MPI_Recv(&local_columns[0],
                     delta, MPI_INT, 0, 2, ringcomm, &status);
     }
 
@@ -110,7 +110,7 @@ int ParallelSum(std::vector <int> vec, int sz, MPI_Comm ringcomm) {
 }
 
 std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
-                        std::vector <int> message, int mess_size) {
+                std::vector <int> message, int mess_size) {
     int size, rank;
     MPI_Comm_size(ringcomm, &size);
     MPI_Comm_rank(ringcomm, &rank);
@@ -130,11 +130,11 @@ std::vector<int> Send(MPI_Comm ringcomm, int source, int dest,
         MPI_Cart_shift(ringcomm, 0, 1, &curr_source, &curr_dest);
 
         if (rank == source) {
-            MPI_Send(&message[0], 
+            MPI_Send(&message[0],
                     mess_size, MPI_INT, curr_dest, 1, ringcomm);
         } else if (rank == dest) {
             result.resize(mess_size);
-            MPI_Recv(&result[0], 
+            MPI_Recv(&result[0],
                 mess_size, MPI_INT, curr_source, 1, ringcomm, &status);
         } else {
             std::vector<int> *tmp = new std::vector<int>;

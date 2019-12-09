@@ -28,7 +28,7 @@ TEST(Ring_Topology, no_ring_topology_if_ndims_not_equal_one) {
 
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Dims_create(size, 2, dims.data());
-    MPI_Cart_create(MPI_COMM_WORLD, 2, 
+    MPI_Cart_create(MPI_COMM_WORLD, 2,
             dims.data(), periods.data(), 0, &testcomm);
 
     EXPECT_FALSE(IsRingTopology(testcomm));
@@ -39,7 +39,7 @@ TEST(Ring_Topology, no_ring_topology_if_period_not_equal_one) {
     std::vector<int> dims(1), periods(1, 0);
 
     MPI_Comm_size(MPI_COMM_WORLD, &dims[0]);
-    MPI_Cart_create(MPI_COMM_WORLD, 1, 
+    MPI_Cart_create(MPI_COMM_WORLD, 1,
             dims.data(), periods.data(), 0, &testcomm);
 
     EXPECT_FALSE(IsRingTopology(testcomm));
