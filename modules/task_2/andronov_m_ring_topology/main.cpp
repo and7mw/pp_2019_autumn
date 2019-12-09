@@ -197,17 +197,15 @@ TEST(Ring_Topology, Performance_Test_On_Vector_Sum) {
     int global_sum_parallel_world_comm = ParallelSum(global_vec,
                                     count_size_vector, MPI_COMM_WORLD);
     end_world_comm = MPI_Wtime();
-    double time_world_comm = end_world_comm - start_world_comm;
     /*if (rank == 0)
-        std::cout << time_world_comm << std::endl;*/
+        std::cout << (end_world_comm - start_world_comm) << std::endl;*/
 
     start_ring_topo = MPI_Wtime();
     int global_sum_parallel_ring_topology = ParallelSum(global_vec,
                                     count_size_vector, ringcomm);
     end_ring_topo = MPI_Wtime();
-    double time_ring_topo = end_ring_topo - start_ring_topo;
     /*if (rank == 0)
-        std::cout << time_ring_topo << std::endl;*/
+        std::cout << (end_ring_topo - start_ring_topo) << std::endl;*/
 
     if (rank == 0) {
         start_seq = MPI_Wtime();
