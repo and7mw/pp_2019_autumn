@@ -9,6 +9,10 @@ MPI_Comm CreateRingTopology(MPI_Comm oldcomm);
 
 bool IsRingTopology(MPI_Comm comm);
 
+std::vector<int> GetRandomVector(int size);
+int SeqSum(std::vector<int> vec);
+int ParallelSum(std::vector <int> vec, int sz, MPI_Comm ringcomm);
+
 std::vector<int> Send(MPI_Comm ringcomm, int source, int dest, std::vector<int> message, int mess_size);
 
 #endif  // MODULES_TASK_2_ANDRONOV_M_RING_TOPOLOGY_RING_TOPOLOGY_H_

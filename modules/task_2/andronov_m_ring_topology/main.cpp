@@ -2,6 +2,7 @@
 #include <gtest-mpi-listener.hpp>
 #include <gtest/gtest.h>
 #include <vector>
+// #include <iostream>
 #include "../../../modules/task_2/andronov_m_ring_topology/ring_topology.h"
 
 TEST(Ring_Topology, can_create_ring_topology) {
@@ -172,6 +173,44 @@ TEST(Ring_Topology, can_send_to_itself) {
     if (rank == 0) {
         std::vector<int> emessage(3, 1);
         EXPECT_EQ(emessage, result);
+    }
+}
+
+TEST(Ring_Topology, Performance_Test_On_Vector_Sum) {
+    int rank;
+    MPI_Comm ringcomm = CreateRingTopology(MPI_COMM_WORLD);
+    MPI_Comm_rank(ringcomm, &rank);
+
+    // double start_world_comm, end_world_comm, time_world_comm;
+    // double start_ring_topo, end_ring_topo, time_ring_topo;
+    std::vector<int> global_vec;
+    const int count_size_vector = 999;
+
+    if (rank == 0) {
+        global_vec = GetRandomVector(count_size_vector);
+    }
+
+    // start_world_comm = MPI_Wtime();
+    int global_sum_parallel_world_comm = ParallelSum(global_vec,
+        count_size_vector, MPI_COMM_WORLD);
+    /*end_world_comm = MPI_Wtime();
+    time_world_comm = end_world_comm - start_world_comm;
+    if (rank == 0)
+        std::cout << time_world_comm << std::endl;*/
+
+        // start_ring_topo = MPI_Wtime();
+    int global_sum_parallel_ring_topology = ParallelSum(global_vec,
+        count_size_vector, ringcomm);
+    /*end_ring_topo = MPI_Wtime();
+    time_ring_topo = end_ring_topo - start_ring_topo;
+    if (rank == 0)
+        std::cout << time_ring_topo << std::endl;*/
+
+    if (rank == 0) {
+        int global_sum_seq = SeqSum(global_vec);
+
+        EXPECT_EQ(global_sum_seq, global_sum_parallel_world_comm);
+        EXPECT_EQ(global_sum_seq, global_sum_parallel_ring_topology);
     }
 }
 
