@@ -187,7 +187,7 @@ TEST(Ring_Topology, Performance_Test_On_Vector_Sum) {
     double start_ring_topo, end_ring_topo, time_ring_topo;
     double start_seq, end_seq, time_seq;
     std::vector<int> global_vec;
-    const int count_size_vector = 999999;
+    const int count_size_vector = 999;
 
     if (rank == 0) {
         global_vec = GetRandomVector(count_size_vector);
