@@ -80,8 +80,7 @@ int ParallelSum(std::vector <int> vec, int sz, MPI_Comm ringcomm) {
         }
         local_columns0 = std::vector<int>(vec.begin(),
             vec.begin() + (delta + delta_rem));
-    }
-    else {
+    } else {
         MPI_Status status;
         if (delta > 0)
             MPI_Recv(&local_columns[0],
@@ -99,8 +98,7 @@ int ParallelSum(std::vector <int> vec, int sz, MPI_Comm ringcomm) {
                 global_sum += local_sum;
             }
         }
-    }
-    else {
+    } else {
         if (delta > 0) {
             local_sum = SeqSum(local_columns);
         }
