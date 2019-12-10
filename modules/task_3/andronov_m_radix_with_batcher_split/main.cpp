@@ -233,18 +233,20 @@
 //    EXPECT_EQ(3, size2);
 //}
 
-TEST(Radix_With_Batcher_Split, sort_10) {
+TEST(Radix_With_Batcher_Split, sort) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     std::vector<int> array;
-    const int size = 10;
+    const int size = 15;
     if (rank == 0) {
         array = GetRandomVector(size);
     }
 
-    array = ParallelRadixSortBatcherSplit(array, size);
-
-    EXPECT_EQ(1, 1);
+    std::vector<int> result_array = ParallelRadixSortBatcherSplit(array, size);
+    if (rank == 0) {
+        sort(array.begin(), array.end());
+        EXPECT_EQ(array, result_array);
+    }
 }
 
 //TEST(Radix_With_Batcher_Split, ) {
