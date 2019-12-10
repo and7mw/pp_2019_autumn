@@ -202,6 +202,9 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array,
         MPI_COMM_TASK = MPI_COMM_WORLD;
     }
 
+    if (MPI_COMM_TASK == MPI_COMM_NULL)
+        return array;
+
     if (MPI_COMM_TASK != MPI_COMM_NULL) {
         MPI_Comm_size(MPI_COMM_TASK, &size);
         MPI_Comm_rank(MPI_COMM_TASK, &rank);
