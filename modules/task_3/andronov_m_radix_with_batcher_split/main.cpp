@@ -18,11 +18,10 @@ TEST(Radix_With_Batcher_Split, throw_radix_sort_with_0_elements) {
 TEST(Radix_With_Batcher_Split, radix_sort_with_even_number_elements) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    const int size = 30;
 
     if (rank == 0) {
         std::vector<int> vec, exp_vec;
-        vec = GetRandomVector(size);
+        vec = GetRandomVector(30);
         exp_vec = vec;
         std::sort(exp_vec.begin(), exp_vec.end());
         vec = RadixSort(vec);
@@ -34,11 +33,10 @@ TEST(Radix_With_Batcher_Split, radix_sort_with_even_number_elements) {
 TEST(Radix_With_Batcher_Split, radix_sort_with_odd_number_elements) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    const int size = 35;
 
     if (rank == 0) {
         std::vector<int> vec, exp_vec;
-        vec = GetRandomVector(2);
+        vec = GetRandomVector(35);
         exp_vec = vec;
         std::sort(exp_vec.begin(), exp_vec.end());
         vec = RadixSort(vec);
