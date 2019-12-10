@@ -237,7 +237,7 @@ TEST(Radix_With_Batcher_Split, sort) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     std::vector<int> array;
-    const int size = 15;
+    const int size = 150;
     if (rank == 0) {
         array = GetRandomVector(size);
     }

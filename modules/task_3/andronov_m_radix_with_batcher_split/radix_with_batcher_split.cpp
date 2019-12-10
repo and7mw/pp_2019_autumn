@@ -241,26 +241,34 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array, int size_
         int count_curr_splited_array = 0;
         int curr_last_rank = size - 1; //неиспользуемый процесс
         int curr_split = 1;
-        for (int i = 0; i < 2/*iteration_size*/; i++) {
+        int current_array_count = 0;
+        for (int i = 0; i < iteration_size; i++) {
             if (rank % curr_split == 0) { //те кто учавствуют в слиянии
+                current_array_count = 0;
+                for (int k = 0; k < sendcounts.size(); k++) {
+                    if (sendcounts[k] != 0)
+                        current_array_count++;
+                }
                 if (((rank / curr_split) % 2 == 0) && (rank == curr_last_rank)
-                        && (count_curr_splited_array % 2 == 0)) {//последние условие
+                           && (current_array_count % 2 != 0)) {
+                       // && (count_curr_splited_array % 2 == 0)) {//последние условие
+                    //std::cout << "rank: " << rank << std::endl;
                     count_curr_splited_array = 0;
-                    for (int i = 0; i < size; i += (curr_split * 2)) { //sendcounts.size() -> size
-                        if (i + curr_split < size) { //sendcounts.size() -> size
-                            sendcounts[i] += sendcounts[i + curr_split];
-                            sendcounts[i + curr_split] = 0;
+                    for (int j = 0; j < size; j += (curr_split * 2)) { //sendcounts.size() -> size
+                        if (j + curr_split < size) { //sendcounts.size() -> size
+                            sendcounts[j] += sendcounts[j + curr_split];
+                            sendcounts[j + curr_split] = 0;
                             count_curr_splited_array++;
 
-                            if ((i + curr_split * 2) >= size) { // >= ???
+                            if ((j + curr_split * 2) >= size) { // >= ???
                                 if ((count_curr_splited_array - 1) % 2 == 0)
-                                    curr_last_rank = i;
+                                    curr_last_rank = j;
                                 else
                                     curr_last_rank = -1;
                             }
                         } else {
                             if (count_curr_splited_array % 2 == 0)
-                                curr_last_rank = i;
+                                curr_last_rank = j;
                             else
                                 curr_last_rank = -1;
                         }
@@ -272,58 +280,52 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array, int size_
                 }
                 if ((rank / curr_split) % 2 == 0) {
                     MPI_Status status;
-                    //проверка на last arr
-                    //std::vector<int> even_elem(sendcounts[rank + curr_split]);
-                    if (i == 1)
-                        std::cout << "rank:" << rank << " " << rank + curr_split << std::endl;
+                    std::vector<int> even_elem(sendcounts[rank + curr_split]);
 
-                    /*MPI_Send(local_array.data(), sendcounts[rank], MPI_INT, rank + curr_split,
-                        curr_split, MPI_COMM_TASK);*/
-                    /*MPI_Recv(even_elem.data(), sendcounts[rank + curr_split], MPI_INT,
+                    MPI_Send(local_array.data(), sendcounts[rank], MPI_INT, rank + curr_split,
+                        curr_split, MPI_COMM_TASK);
+                    MPI_Recv(even_elem.data(), sendcounts[rank + curr_split], MPI_INT,
                         rank + curr_split, curr_split, MPI_COMM_TASK, &status);
                     even_elem = EvenSplit(local_array, even_elem);
                     int odd_count = sendcounts[rank] / 2 + sendcounts[rank + curr_split] / 2;
                     std::vector<int> odd_result(odd_count);
                     MPI_Recv(odd_result.data(), odd_count, MPI_INT, rank + curr_split,
                         curr_split, MPI_COMM_WORLD, &status);
-                    local_array = EvenOddSplit(even_elem, odd_result);*/
+                    local_array = EvenOddSplit(even_elem, odd_result);
                 }
                 else {
                     MPI_Status status;
-                    //std::vector<int> odd_elem(sendcounts[rank - curr_split]);
+                    std::vector<int> odd_elem(sendcounts[rank - curr_split]);
 
-                    if (i == 1)
-                        std::cout << "rank:" << rank << " " << rank + curr_split << std::endl;
-
-                    /*MPI_Recv(odd_elem.data(), sendcounts[rank - curr_split], MPI_INT,
-                        rank - curr_split, curr_split, MPI_COMM_TASK, &status);*/
-                    /*MPI_Send(local_array.data(), sendcounts[rank], MPI_INT, rank - curr_split,
+                    MPI_Recv(odd_elem.data(), sendcounts[rank - curr_split], MPI_INT,
+                        rank - curr_split, curr_split, MPI_COMM_TASK, &status);
+                    MPI_Send(local_array.data(), sendcounts[rank], MPI_INT, rank - curr_split,
                         curr_split, MPI_COMM_TASK);
                     odd_elem = OddSplit(odd_elem, local_array);
                     int odd_count = sendcounts[rank] / 2 + sendcounts[rank - curr_split] / 2;
                     MPI_Send(odd_elem.data(), odd_count, MPI_INT, rank - curr_split,
-                            curr_split, MPI_COMM_TASK);*/
+                            curr_split, MPI_COMM_TASK);
                 }
             } else {
                 return local_array;
             }
 
             count_curr_splited_array = 0;
-            for (int i = 0; i < size; i += (curr_split*2)) {
-                if (i + curr_split < size) { // условие ??? //если есть следующий элемент
-                    sendcounts[i] += sendcounts[i + curr_split];
-                    sendcounts[i + curr_split] = 0;
+            for (int j = 0; j < size; j += (curr_split*2)) {
+                if (j + curr_split < size) { // условие ??? //если есть следующий элемент
+                    sendcounts[j] += sendcounts[j + curr_split];
+                    sendcounts[j + curr_split] = 0;
                     count_curr_splited_array++;
 
-                    if ((i + curr_split * 2) >= size) { // >= ???
+                    if ((j + curr_split * 2) >= size) { // >= ???
                         if ((count_curr_splited_array - 1) % 2 == 0)
-                            curr_last_rank = i;
+                            curr_last_rank = j;
                         else
                             curr_last_rank = -1;
                     }
                 } else {
                     if (count_curr_splited_array % 2 == 0)
-                        curr_last_rank = i;
+                        curr_last_rank = j;
                     else
                         curr_last_rank = -1;
                 }
