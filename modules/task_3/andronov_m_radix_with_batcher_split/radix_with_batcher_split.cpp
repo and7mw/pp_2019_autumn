@@ -202,6 +202,9 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array,
         MPI_COMM_TASK = MPI_COMM_WORLD;
     }
 
+    if (MPI_COMM_TASK == MPI_COMM_NULL)
+        return array;
+
     if (MPI_COMM_TASK != MPI_COMM_NULL) {
         MPI_Comm_size(MPI_COMM_TASK, &size);
         MPI_Comm_rank(MPI_COMM_TASK, &rank);
@@ -242,7 +245,7 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array,
         for (int i = 0; i < iteration_size; i++) {
             if (rank % curr_split == 0) {
                 current_array_count = 0;
-                for (int k = 0; k < sendcounts.size(); k++) {
+                for (int k = 0; k < static_cast<int>(sendcounts.size()); k++) {
                     if (sendcounts[k] != 0)
                         current_array_count++;
                 }
@@ -331,10 +334,6 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array,
             }
             curr_split *= 2;
         }
-
         return local_array;
     }
-
-    if (MPI_COMM_TASK == MPI_COMM_NULL)
-        return array;
 }
