@@ -1,7 +1,7 @@
 // Copyright 2019 Andronov Maxim
 #include <random>
 #include <vector>
-#include <algorithm>
+#include <utility>
 #include "../../../modules/task_3/andronov_m_radix_with_batcher_split/radix_with_batcher_split.h"
 
 std::vector<int> GetRandomVector(int size) {
