@@ -3,9 +3,10 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include "../../../modules/task_3/andronov_m_radix_with_batcher_split/radix_with_batcher_split.h"
 
-TEST(Radix_With_Batcher_Split, throw_radix_sort_with_0_elements) {
+/*TEST(Radix_With_Batcher_Split, throw_radix_sort_with_0_elements) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -78,6 +79,34 @@ TEST(Radix_With_Batcher_Split, sort_with_odd_number_elements) {
     if (rank == 0) {
         sort(array.begin(), array.end());
         EXPECT_EQ(array, result_array);
+    }
+}*/
+
+TEST(Radix_With_Batcher_Split, performance_test) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<int> array;
+    const int size = 9999999;
+    double start_parall, end_parall, time_parall;
+
+    if (rank == 0) {
+        array = GetRandomVector(size);
+    }
+
+    start_parall = MPI_Wtime();
+    std::vector<int> parall_result_array = ParallelRadixSortBatcherSplit(array, size);
+    end_parall = MPI_Wtime();
+    time_parall = end_parall - start_parall;
+
+    if (rank == 0) {
+        double start_seq, end_seq, time_seq;
+        start_seq = MPI_Wtime();
+        std::vector<int> seq_result_array = RadixSort(array);
+        end_seq = MPI_Wtime();
+        time_seq = end_seq - start_seq;
+
+        std::cout << "Parallel result: " << time_parall << std::endl;
+        std::cout << "Sequential result: " << time_seq << std::endl;
     }
 }
 
