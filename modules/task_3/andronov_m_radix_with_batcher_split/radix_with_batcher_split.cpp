@@ -278,37 +278,22 @@ std::vector<int> ParallelRadixSortBatcherSplit(std::vector<int> array,
                 }
                 if ((rank / curr_split) % 2 == 0) {
                     MPI_Status status;
-                    std::vector<int> even_elem(sendcounts[rank + curr_split]);
+                    std::vector<int> recv_elem(sendcounts[rank + curr_split]);
+                    std::vector<int> even_elem;
+                    std::vector<int> odd_elem;
 
-                    MPI_Send(local_array.data(), sendcounts[rank],
-                        MPI_INT, rank + curr_split,
-                            curr_split, MPI_COMM_TASK);
-                    MPI_Recv(even_elem.data(), sendcounts[rank + curr_split],
+                    MPI_Recv(recv_elem.data(), sendcounts[rank + curr_split],
                         MPI_INT, rank + curr_split,
                             curr_split, MPI_COMM_TASK, &status);
-                    even_elem = EvenSplit(local_array, even_elem);
-                    int odd_count = sendcounts[rank] / 2
-                            + sendcounts[rank + curr_split] / 2;
-                    std::vector<int> odd_result(odd_count);
-                    MPI_Recv(odd_result.data(), odd_count,
-                        MPI_INT, rank + curr_split,
-                            curr_split, MPI_COMM_TASK, &status);
-                    local_array = EvenOddSplit(even_elem, odd_result);
+
+                    even_elem = EvenSplit(local_array, recv_elem);
+                    odd_elem = OddSplit(local_array, recv_elem);
+
+                    local_array = EvenOddSplit(even_elem, odd_elem);
                 } else {
-                    MPI_Status status;
-                    std::vector<int> odd_elem(sendcounts[rank - curr_split]);
-
-                    MPI_Recv(odd_elem.data(), sendcounts[rank - curr_split],
-                        MPI_INT, rank - curr_split, curr_split,
-                            MPI_COMM_TASK, &status);
                     MPI_Send(local_array.data(), sendcounts[rank],
                         MPI_INT, rank - curr_split, curr_split,
                             MPI_COMM_TASK);
-                    odd_elem = OddSplit(odd_elem, local_array);
-                    int odd_count = sendcounts[rank] / 2
-                            + sendcounts[rank - curr_split] / 2;
-                    MPI_Send(odd_elem.data(), odd_count,
-                        MPI_INT, rank - curr_split, curr_split, MPI_COMM_TASK);
                 }
             } else {
                 return local_array;
